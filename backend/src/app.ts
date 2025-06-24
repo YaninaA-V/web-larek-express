@@ -30,7 +30,7 @@ app.listen(3000, () => {
 });
 
 async function connectToDatabase() {
-  console.log("MongoDB подключена!");
+  console.log("MongoDB подключена");
   try {
     await mongoose.connect("mongodb://127.0.0.1:27017/weblarek");
   } catch (error) {
