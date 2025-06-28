@@ -1,4 +1,4 @@
-import { celebrate, Joi, Segments } from 'celebrate';
+import { celebrate, Joi } from 'celebrate';
 import mongoose from 'mongoose';
 
 export const validateObjectId = celebrate({

@@ -31,7 +31,7 @@ export const createOrder = async (
   }
 
   const {
-    payment, email, phone, address, total, items,
+    _payment, _email, _phone, _address, total, items,
   } = req.body;
 
   try {

@@ -47,7 +47,7 @@ const productSchema = new Schema({
 
 productSchema.post(
   'save',
-  (error: any, doc: IProduct, next: Function) => {
+  (error: any, _doc: IProduct, next: Function) => {
     if (error.name === 'MongoServerError' && error.code === 11000) {
       const duplicateError = new Error('Товар с таким названием уже существует');
       (duplicateError as any).status = 409;

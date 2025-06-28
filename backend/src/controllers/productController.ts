@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { Error as MongooseError } from 'mongoose';
+import { ApiListResponse } from '../types/api';
 import BadRequestError from '../errors/bad-request-error';
 import ConflictError from '../errors/conflict-error';
 import InternalServerError from '../errors/internal-server-error';
 import NotFoundError from '../errors/not-found-error';
 import product, { IProduct } from '../models/product';
-import { ApiListResponse } from 'types/api';
 
 export const getAllProducts = async (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction,
 ) => {
@@ -17,7 +17,7 @@ export const getAllProducts = async (
     const products: IProduct[] = await product.find();
     const response: ApiListResponse<IProduct> = {
       total: products.length,
-      items: products
+      items: products,
     };
 
     res.status(200).json(response);
@@ -78,22 +78,22 @@ export const deleteProduct = async (
     res.json({ message: 'Товар успешно удален' });
   } catch (error) {
     next(error);
-  }  
+  }
 };
 
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const productUpdate = await product.findByIdAndUpdate(
-    req.params.productId,
-    req.body,
-    { new: true },
-  );
-  if (!productUpdate) {
-    return res.status(404).json({ message: 'Товар не найден' });
-  }
-  res.json(productUpdate);
+      req.params.productId,
+      req.body,
+      { new: true },
+    );
+    if (!productUpdate) {
+      return res.status(404).json({ message: 'Товар не найден' });
+    }
+    res.json(productUpdate);
   } catch (error) {
     console.error('Ошибка при обновлении товара:', error);
     res.status(500).json({ message: 'Произошла ошибка при обновлении товара' });
-  }  
+  }
 };
