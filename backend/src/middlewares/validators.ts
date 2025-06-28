@@ -1,14 +1,12 @@
-import { celebrate, Joi, Segments } from "celebrate";
-import mongoose from "mongoose";
+import { celebrate, Joi, Segments } from 'celebrate';
+import mongoose from 'mongoose';
 
 export const validateObjectId = celebrate({
   params: Joi.object({
     productId: Joi.string()
-      .custom((value, helpers) => {
-        return mongoose.Types.ObjectId.isValid(value)
-          ? value
-          : helpers.error("any.invalid");
-      })
+      .custom((value, helpers) => (mongoose.Types.ObjectId.isValid(value)
+        ? value
+        : helpers.error('any.invalid')))
       .required(),
   }),
 });
@@ -21,7 +19,7 @@ export const validateProductBody = celebrate({
       originalName: Joi.string().required(),
     }).required(),
     category: Joi.string().required(),
-    description: Joi.string().default(""),
+    description: Joi.string().default(''),
     price: Joi.number().default(null),
   }),
 });

@@ -1,33 +1,40 @@
-import BadRequestError from "../errors/bad-request-error";
-import ConflictError from "../errors/conflict-error";
-import InternalServerError from "../errors/internal-server-error";
-import NotFoundError from "../errors/not-found-error";
-import { NextFunction, Request, Response } from "express";
-import product, { IProduct } from "../models/product";
-import { Error as MongooseError } from "mongoose";
+import { NextFunction, Request, Response } from 'express';
+import { Error as MongooseError } from 'mongoose';
+import BadRequestError from '../errors/bad-request-error';
+import ConflictError from '../errors/conflict-error';
+import InternalServerError from '../errors/internal-server-error';
+import NotFoundError from '../errors/not-found-error';
+import product, { IProduct } from '../models/product';
+import { ApiListResponse } from 'types/api';
 
 export const getAllProducts = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  console.log("Запрос к /product получен");
+  console.log('Запрос к /product получен');
   try {
     const products: IProduct[] = await product.find();
-    console.log("Найдены товары:", products);
-    res.status(200).json(products);
+    const response: ApiListResponse<IProduct> = {
+      total: products.length,
+      items: products
+    };
+
+    res.status(200).json(response);
   } catch (error) {
-    next(new InternalServerError("Ошибка при получении товаров"));
+    next(new InternalServerError('Ошибка при получении товаров'));
   }
 };
 
 export const createProducts = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    const { description, image, title, category, price }: IProduct = req.body;
+    const {
+      description, image, title, category, price,
+    }: IProduct = req.body;
 
     const newProduct: IProduct = new product({
       title,
@@ -36,7 +43,7 @@ export const createProducts = async (
         originalName: image.originalName,
       },
       category,
-      description: description || "",
+      description: description || '',
       price: price ?? null,
     });
 
@@ -45,39 +52,48 @@ export const createProducts = async (
   } catch (error: any) {
     if (error instanceof MongooseError.ValidationError) {
       return next(
-        new BadRequestError("Ошибка валидации данных при создании товара")
+        new BadRequestError('Ошибка валидации данных при создании товара'),
       );
     }
-    if (error instanceof Error && error.message.includes("E11000")) {
+    if (error instanceof Error && error.message.includes('E11000')) {
       return next(new ConflictError());
     }
-    next(new InternalServerError());
+    next(error);
   }
 };
 
 export const deleteProduct = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const productDelete = await product.findById(req.params.productId);
+  try {
+    const productDelete = await product.findById(req.params.productId);
 
-  if (!productDelete) {
-    return next(new NotFoundError("Товар не найден"));
-  }
+    if (!productDelete) {
+      return next(new NotFoundError('Товар не найден'));
+    }
 
-  await product.deleteOne();
-  res.json({ message: "Товар успешно удален" });
+    await product.findByIdAndDelete(req.params.productId);
+    res.json({ message: 'Товар успешно удален' });
+  } catch (error) {
+    next(error);
+  }  
 };
 
 export const updateProduct = async (req: Request, res: Response) => {
-  const productUpdate = await product.findByIdAndUpdate(
+  try {
+    const productUpdate = await product.findByIdAndUpdate(
     req.params.productId,
     req.body,
-    { new: true }
+    { new: true },
   );
   if (!productUpdate) {
-    return res.status(404).json({ message: "Товар не найден" });
+    return res.status(404).json({ message: 'Товар не найден' });
   }
   res.json(productUpdate);
+  } catch (error) {
+    console.error('Ошибка при обновлении товара:', error);
+    res.status(500).json({ message: 'Произошла ошибка при обновлении товара' });
+  }  
 };

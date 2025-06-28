@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
 interface IProductImage {
   fileName: string;
@@ -16,10 +16,10 @@ export interface IProduct extends Document {
 const productSchema = new Schema({
   title: {
     type: String,
-    required: [true, "Название товара обязательно"],
+    required: [true, 'Название товара обязательно'],
     unique: true,
-    minlength: [2, "Название должно содержать минимум 2 символа"],
-    maxlength: [30, "Название не может превышать 30 символов"],
+    minlength: [2, 'Название должно содержать минимум 2 символа'],
+    maxlength: [30, 'Название не может превышать 30 символов'],
   },
   image: {
     fileName: {
@@ -33,11 +33,11 @@ const productSchema = new Schema({
   },
   category: {
     type: String,
-    required: [true, "Категория товара обязательна"],
+    required: [true, 'Категория товара обязательна'],
   },
   description: {
     type: String,
-    default: "",
+    default: '',
   },
   price: {
     type: Number,
@@ -46,14 +46,16 @@ const productSchema = new Schema({
 });
 
 productSchema.post(
-  "save",
-  function (error: any, doc: IProduct, next: Function) {
-    if (error.name === "MongoServerError" && error.code === 11000) {
-      next(new Error("Товар с таким названием уже существует"));
+  'save',
+  (error: any, doc: IProduct, next: Function) => {
+    if (error.name === 'MongoServerError' && error.code === 11000) {
+      const duplicateError = new Error('Товар с таким названием уже существует');
+      (duplicateError as any).status = 409;
+      next(duplicateError);
     } else {
       next(error);
     }
-  }
+  },
 );
 
-export default mongoose.model<IProduct>("product", productSchema, "products");
+export default mongoose.model<IProduct>('product', productSchema, 'products');

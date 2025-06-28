@@ -1,19 +1,19 @@
-import { Request } from "express";
-import winston from "winston";
-import expressWinston from "express-winston";
+import { Request } from 'express';
+import winston from 'winston';
+import expressWinston from 'express-winston';
 
 export const requestLogger = expressWinston.logger({
-  transports: [new winston.transports.File({ filename: "request.log" })],
+  transports: [new winston.transports.File({ filename: 'request.log' })],
   format: winston.format.json(),
   meta: true,
-  msg: "HTTP {{req.method}} {{req.url}}",
+  msg: 'HTTP {{req.method}} {{req.url}}',
   expressFormat: true,
   colorize: false,
-  ignoreRoute: (req: Request) => req.url === "/healthcheck",
+  ignoreRoute: (req: Request) => req.url === '/healthcheck',
 });
 
 export const errorLogger = expressWinston.errorLogger({
-  transports: [new winston.transports.File({ filename: "error.log" })],
+  transports: [new winston.transports.File({ filename: 'error.log' })],
   format: winston.format.json(),
   meta: true,
   msg: '{ "error": "{{err.message}}", "status": "{{err.status}}" }',

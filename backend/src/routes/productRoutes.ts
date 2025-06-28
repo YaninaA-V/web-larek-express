@@ -1,28 +1,26 @@
+import express from 'express';
 import {
   createProducts,
   deleteProduct,
   getAllProducts,
   updateProduct,
-} from "../controllers/productController";
-import express from "express";
+} from '../controllers/productController';
 import {
   validateObjectId,
   validateProductBody,
   validateProductUpdateBody,
-} from "../middlewares/validators";
-import { auth } from "../middlewares/auth";
+} from '../middlewares/validators';
 
 const productRoutes = express.Router();
 
-productRoutes.get("/", getAllProducts);
-productRoutes.post("/", validateProductBody, createProducts);
-productRoutes.delete("/:productId", auth, validateObjectId, deleteProduct);
+productRoutes.get('/', getAllProducts);
+productRoutes.post('/', validateProductBody, createProducts);
+productRoutes.delete('/:productId', validateObjectId, deleteProduct);
 productRoutes.patch(
-  "/:productId",
-  auth,
+  '/:productId',
   validateObjectId,
   validateProductUpdateBody,
-  updateProduct
+  updateProduct,
 );
 
 export default productRoutes;
