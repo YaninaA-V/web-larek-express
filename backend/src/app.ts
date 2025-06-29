@@ -23,9 +23,9 @@ app.use(requestLogger);
 app.use('/product', productRoutes);
 app.use('/orders', orderRoutes);
 
-app.use(errors());
 app.use(notFoundHandler);
 app.use(errorLogger);
+app.use(errors());
 app.use(errorHandler);
 
 app.listen(3000, () => {

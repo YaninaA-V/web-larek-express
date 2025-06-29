@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { Error as MongooseError } from 'mongoose';
+import { Error, Error as MongooseError } from 'mongoose';
 import { ApiListResponse } from '../types/api';
 import BadRequestError from '../errors/bad-request-error';
 import ConflictError from '../errors/conflict-error';
@@ -81,7 +81,7 @@ export const deleteProduct = async (
   }
 };
 
-export const updateProduct = async (req: Request, res: Response) => {
+export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productUpdate = await product.findByIdAndUpdate(
       req.params.productId,
@@ -89,11 +89,13 @@ export const updateProduct = async (req: Request, res: Response) => {
       { new: true },
     );
     if (!productUpdate) {
-      return res.status(404).json({ message: 'Товар не найден' });
+      const error = new Error('Товар не найден');
+      (error as any).status = 404;      
+      return next(error);
     }
     res.json(productUpdate);
   } catch (error) {
     console.error('Ошибка при обновлении товара:', error);
-    res.status(500).json({ message: 'Произошла ошибка при обновлении товара' });
+    next(error);
   }
 };
