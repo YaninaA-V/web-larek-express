@@ -25,9 +25,10 @@ export const createOrder = async (
 ) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return next(
+    next(
       new BadRequestError('Ошибка валидации данных при оформлении заказа'),
     );
+    return;
   }
 
   const {
@@ -38,22 +39,25 @@ export const createOrder = async (
     const products = await product.find({ _id: { $in: items } });
 
     if (products.length !== items.length) {
-      return next(new BadRequestError('Некоторые товары не найдены'));
+      next(new BadRequestError('Некоторые товары не найдены'));
+      return;
     }
 
     const unavailableProducts = products.filter((p) => p.price === null);
     if (unavailableProducts.length > 0) {
-      return next(
+      next(
         new BadRequestError('Некоторые товары недоступны для заказа'),
       );
+      return;
     }
 
     const calculatedTotal = products.reduce(
-      (sum, product) => sum + (product.price || 0),
+      (sum, currentProduct) => sum + (currentProduct.price || 0),
       0,
     );
     if (calculatedTotal !== total) {
-      return next(new BadRequestError('Неверная сумма заказа'));
+      next(new BadRequestError('Неверная сумма заказа'));
+      return;
     }
 
     res.status(200).json({

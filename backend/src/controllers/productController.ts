@@ -5,16 +5,15 @@ import BadRequestError from '../errors/bad-request-error';
 import ConflictError from '../errors/conflict-error';
 import InternalServerError from '../errors/internal-server-error';
 import NotFoundError from '../errors/not-found-error';
-import product, { IProduct } from '../models/product';
+import Product, { IProduct } from '../models/product';
 
 export const getAllProducts = async (
   _req: Request,
   res: Response,
   next: NextFunction,
-) => {
-  console.log('Запрос к /product получен');
+): Promise<void> => {
   try {
-    const products: IProduct[] = await product.find();
+    const products: IProduct[] = await Product.find();
     const response: ApiListResponse<IProduct> = {
       total: products.length,
       items: products,
@@ -30,13 +29,13 @@ export const createProducts = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void> => {
   try {
     const {
       description, image, title, category, price,
     }: IProduct = req.body;
 
-    const newProduct: IProduct = new product({
+    const newProduct: IProduct = new Product({
       title,
       image: {
         fileName: image.fileName,
@@ -51,12 +50,12 @@ export const createProducts = async (
     res.status(201).json(savedProduct);
   } catch (error: any) {
     if (error instanceof MongooseError.ValidationError) {
-      return next(
-        new BadRequestError('Ошибка валидации данных при создании товара'),
-      );
+      next(new BadRequestError('Ошибка валидации данных при создании товара'));
+      return;
     }
     if (error instanceof Error && error.message.includes('E11000')) {
-      return next(new ConflictError());
+      next(new ConflictError());
+      return;
     }
     next(error);
   }
@@ -66,36 +65,41 @@ export const deleteProduct = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void> => {
   try {
-    const productDelete = await product.findById(req.params.productId);
+    const productDelete = await Product.findById(req.params.productId);
 
     if (!productDelete) {
-      return next(new NotFoundError('Товар не найден'));
+      next(new NotFoundError('Товар не найден'));
+      return;
     }
 
-    await product.findByIdAndDelete(req.params.productId);
+    await Product.findByIdAndDelete(req.params.productId);
     res.json({ message: 'Товар успешно удален' });
   } catch (error) {
     next(error);
   }
 };
 
-export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
+export const updateProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
-    const productUpdate = await product.findByIdAndUpdate(
+    const productUpdate = await Product.findByIdAndUpdate(
       req.params.productId,
       req.body,
       { new: true },
     );
+
     if (!productUpdate) {
-      const error = new Error('Товар не найден');
-      (error as any).status = 404;      
-      return next(error);
+      next(new NotFoundError('Товар не найден'));
+      return;
     }
+
     res.json(productUpdate);
   } catch (error) {
-    console.error('Ошибка при обновлении товара:', error);
     next(error);
   }
 };

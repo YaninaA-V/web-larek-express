@@ -4,8 +4,8 @@ import mongoose from 'mongoose';
 import path from 'path';
 import productRoutes from './routes/productRoutes';
 import orderRoutes from './routes/orderRoutes';
-import { notFoundHandler } from './middlewares/notFoundHandler';
-import { errorHandler } from './middlewares/errorHandler';
+import notFoundHandler from './middlewares/notFoundHandler';
+import errorHandler from './middlewares/errorHandler';
 import { errorLogger, requestLogger } from './middlewares/logger';
 import { errors } from 'celebrate';
 

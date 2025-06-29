@@ -4,44 +4,49 @@ import ConflictError from '../errors/conflict-error';
 import InternalServerError from '../errors/internal-server-error';
 import NotFoundError from '../errors/not-found-error';
 
-export const errorHandler = (
+const errorHandler = (
   err: Error,
   _req: Request,
   res: Response,
   _next: NextFunction,
 ) => {
   if (err instanceof BadRequestError) {
-    return res.status(err.statusCode).json({
+    res.status(err.statusCode).json({
       message: err.message || 'Переданы некорректные данные',
     });
+    return;
   }
 
   if (err instanceof NotFoundError) {
-    return res.status(err.statusCode).json({
+    res.status(err.statusCode).json({
       message: err.message || 'Ресурс не найден',
     });
+    return;
   }
 
   if (err instanceof ConflictError) {
-    return res.status(err.statusCode).json({
+    res.status(err.statusCode).json({
       message: err.message || 'Конфликт данных',
     });
+    return;
   }
 
   if (err instanceof InternalServerError) {
-    return res.status(err.statusCode).json({
+    res.status(err.statusCode).json({
       message: err.message || 'Внутренняя ошибка сервера',
     });
+    return;
   }
 
   if (err.name === 'ValidationError') {
-    return res.status(400).json({
+    res.status(400).json({
       message: 'Ошибка валидации данных',
     });
+    return;
   }
-
-  console.error('Unhandled error:', err);
   res.status(500).json({
     message: 'На сервере произошла ошибка',
   });
 };
+
+export default errorHandler;
